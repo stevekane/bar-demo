@@ -1,0 +1,21 @@
+{
+  "name": "screen",
+  "version": "1.0.0",
+  "description": "This is the screen module for the bar game demo",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test",
+    "watch-src": "watchify -d -o ../public/screen.js index.js",
+    "watch-test": "watchify -d -o ../public/screen-test.js test.js",
+    "watch": "npm run watch-src & npm run watch-test"
+  },
+  "keywords": [
+    "screen"
+  ],
+  "author": "Steve Kane <kanesteven@gmail.com> (github.com/stevekane)",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^0.13.3",
+    "socket.io-client": "^1.3.5"
+  }
+}

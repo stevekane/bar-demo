@@ -1,5 +1,4 @@
 const http = require('http')
-const uuid = require('node-uuid')
 const prettyLog = require('pretty-log-2')
 const sio = require('socket.io')
 const serveStatic = require('serve-static')
