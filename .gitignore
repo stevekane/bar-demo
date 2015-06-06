@@ -2,3 +2,4 @@
 *.swo
 *.orig
 *DS_Store
+node_modules/
