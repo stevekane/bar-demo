@@ -119,7 +119,7 @@ Hand.prototype.toAscii = function () {
                             .join(', ')
   var values = this.values.join(', ')
 
-  return `DOWN: ${downCard}, UP: ${upCards}    VALUES: ${values}`
+  return ` \tDOWN: ${downCard} \t UP: ${upCards} \tVALUES: ${values}`
 }
 
 //:: String -> Number -> Maybe Hand -> Player
@@ -150,13 +150,15 @@ function BlackJack () {
 }
 
 BlackJack.prototype.toAscii = function () {
+  var shoeCount = this.shoe.length
   var dealerText = this.dealer.toAscii()
   var playerText = this.activePlayers.map(invoke('toAscii'))
                                      .join('\n')
 
+  //string templates are pretty sensitive to spacing...
   return (
 `
-SHOE: ${this.shoe.length} cards
+SHOE: ${shoeCount} cards
 ${dealerText}
 ${playerText}
 `)
