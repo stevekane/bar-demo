@@ -64,7 +64,7 @@ function Card (suit, name, values) {
 }
 
 Card.prototype.toAscii = function () {
-  return this.suit + this.name
+  return this.name + this.suit
 }
 
 function Deck () {
