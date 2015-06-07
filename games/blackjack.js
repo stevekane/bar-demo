@@ -145,14 +145,13 @@ Dealer.prototype.toAscii = function () {
 function BlackJack () {
   this.shoe = new Shoe.scrambled
   this.dealer = new Dealer
-  this.activePlayers = []
-  this.newPlayers = []
+  this.players = []
 }
 
 BlackJack.prototype.toAscii = function () {
   var shoeCount = this.shoe.length
   var dealerText = this.dealer.toAscii()
-  var playerText = this.activePlayers.map(invoke('toAscii'))
+  var playerText = this.players.map(invoke('toAscii'))
                                      .join('\n')
 
   //string templates are pretty sensitive to spacing...
@@ -165,26 +164,11 @@ ${playerText}
 }
 
 // TRANSACTIONS!
-BlackJack.prototype.endRound = function () {
-  for (var i = 0; i < this.activePlayers.length; i++) {
-    this.activePlayers[i].hand = null
-  }
-  this.dealer.hand = null
-}
-
-BlackJack.prototype.addPlayers = function () {
-  var newPlayerCount = this.newPlayers.length
-
-  for (var i = 0; i < newPlayerCount; i++) {
-    this.activePlayers.push(this.newPlayers.pop()) 
-  }
-}
-
 BlackJack.prototype.dealRound = function () {
-  if (!this.activePlayers.length && !this.newPlayers.length) return
+  if (!this.players.length) return
 
-  for (var i = 0; i < this.activePlayers.length; i++) {
-    this.activePlayers[i].hand = new Hand(this.shoe.pop(), [this.shoe.pop()])
+  for (var i = 0; i < this.players.length; i++) {
+    this.players[i].hand = new Hand(this.shoe.pop(), [this.shoe.pop()])
   }
   this.dealer.hand = new Hand(this.shoe.pop(), [this.shoe.pop()])
 }
@@ -200,17 +184,13 @@ var blackJack = new BlackJack
 // deal the dealer 
 // calculate results and distribute chips (duration)
 
-blackJack.newPlayers.push(new Player('Steve', 100))
-blackJack.newPlayers.push(new Player('Lynn', 100))
+blackJack.players.push(new Player('Steve', 100))
+blackJack.players.push(new Player('Lynn', 100))
 
-blackJack.addPlayers()
 blackJack.dealRound()
 log(blackJack.toAscii())
-blackJack.endRound()
 
-blackJack.newPlayers.push(new Player('Tom', 100))
+blackJack.players.push(new Player('Tom', 100))
 
-blackJack.addPlayers()
 blackJack.dealRound()
 log(blackJack.toAscii())
-blackJack.endRound()
