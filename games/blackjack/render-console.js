@@ -20,8 +20,8 @@ function renderHand (hand) {
   var values = calculateValues(hand).join(', ') 
 
   return "\tDOWN: " + downCard + 
-         "\tUP: " + upCards + 
-         "\tVALUES: " + values
+         "  UP: " + upCards + 
+         "  VALUES: " + values
 }
 
 function renderPlayer (player) {

@@ -7,4 +7,3 @@ function Player (name, chipCount, hand) {
   this.chipCount = chipCount
   this.hand = hand
 }
-
