@@ -152,7 +152,7 @@ BlackJack.prototype.toAscii = function () {
   var shoeCount = this.shoe.length
   var dealerText = this.dealer.toAscii()
   var playerText = this.players.map(invoke('toAscii'))
-                                     .join('\n')
+                               .join('\n')
 
   //string templates are pretty sensitive to spacing...
   return (
