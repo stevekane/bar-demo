@@ -1,38 +1,29 @@
 'use strict'
 
-function BetCollecting (players, startTime, duration) {
-  this.players = players
-  this.startTime = startTime
-  this.duration = duration
-  this.done = this.duration <= 0
+var State = require('./State')
+
+module.exports.BetCollecting = BetCollecting
+module.exports.CardDealing = CardDealing
+module.exports.Action = Action
+module.exports.PostRound = PostRound
+
+var BET_DURATION = 1000
+var DEAL_DURATION = 2000
+var ACTION_DURATION = 15000
+var POST_DURATION = 3000
+
+function BetCollecting (game) {
+  State.Timed.call(this, game, 'Collecting Bets', BET_DURATION)
 }
 
-BetCollecting.prototype.update = function (dT) {
-  this.done = this.duration <= 0
-  this.duration -= dT 
+function CardDealing (game) {
+  State.Timed.call(this, game, 'Dealing Cards', DEAL_DURATION)
 }
 
-function CardDealing () {
-  //wait duration
+function Action (game) {
+  State.Timed.call(this, game, 'Taking Action', ACTION_DURATION)
 }
 
-function PostDealing () {
-  //handle dealt blackjacks
-  //allow players to split their hand into two hands
-  //allow players to doubledown their bet
-  //if all players are done with postDeal move on
-  //wait duration default for players is postDeal is done
-}
-
-function Action () {
-  //allow all players to hit or stand
-  //stand ends betting phase for player
-  //bust ends betting phase for player
-  //wait duration default for players is to stand
-}
-
-function PostRound () {
-  //calculate and distribute winnings
-  //collect bets from losers
-  //wait duration
+function PostRound (game) {
+  State.Timed.call(this, game, 'Finishing Round', POST_DURATION)
 }

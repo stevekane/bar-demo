@@ -8,20 +8,18 @@ module.exports.renderHand = renderHand
 module.exports.renderPlayer = renderPlayer
 module.exports.renderDealer = renderDealer
 module.exports.renderShoe = renderShoe
-module.exports.renderBlackJack = renderBlackJack
+module.exports.render = render
 
 function renderCard (card) {
   return card.name + card.suit
 }
 
 function renderHand (hand) {
-  var downCard = hand.downCards.map(renderCard).join(', ')
-  var upCards = hand.upCards.map(renderCard).join(', ')
+  var cards = hand.cards.map(renderCard).join(' ')
   var values = calculateValues(hand).join(', ') 
 
-  return "\tDOWN: " + downCard + 
-         "  UP: " + upCards + 
-         "  VALUES: " + values
+  return "\t" + cards + 
+         " (" + values + ")"
 }
 
 function renderPlayer (player) {
@@ -43,12 +41,13 @@ function renderShoe (shoe) {
   return "SHOE: " + shoe.length + " cards"
 }
 
-function renderBlackJack (blackJack) {
+function render (blackJack) {
   var shoeText = renderShoe(blackJack.shoe)
   var dealerText = renderDealer(blackJack.dealer) 
   var playerText = blackJack.players.map(renderPlayer).join('\n')
 
-  return shoeText + "\n" + 
+  return blackJack.stateManager.activeState.name + "\n" +
+         shoeText + "\n" + 
          dealerText + "\n" +
          playerText
 }

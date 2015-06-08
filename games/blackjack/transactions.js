@@ -6,10 +6,9 @@ module.exports.hit = hit
 module.exports.stand = stand
 
 function dealHand (shoe, hand) {
-  hand.downCards.splice(0)
-  hand.upCards.splice(0)
-  hand.downCards.push(shoe.pop())
-  hand.upCards.push(shoe.pop())
+  hand.cards.splice(0)
+  hand.cards.push(shoe.pop())
+  hand.cards.push(shoe.pop())
 }
 
 function dealRound (shoe, players, dealer) {
@@ -20,8 +19,13 @@ function dealRound (shoe, players, dealer) {
   dealHand(shoe, dealer.hand)
 }
 
+function split (player, hand) {
+  var targetHand = player.hands.splice(player.hands.indexOf(hand), 1)
+   
+}
+
 function hit (shoe, hand) {
-  hand.upCards.push(shoe.pop())
+  hand.cards.push(shoe.pop())
 }
 
 function stand (target) {
