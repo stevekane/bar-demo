@@ -3,6 +3,8 @@
 module.exports.pluck = pluck
 module.exports.addLists = addLists
 module.exports.shuffle = shuffle
+module.exports.lowest = lowest
+module.exports.highest = highest
 
 function pluck (attrName) {
   return function innerPluck (obj) {
@@ -28,3 +30,22 @@ function shuffle (o) {
   return o; 
 }
 
+function lowest (ar) {
+  var val
+
+  for (var i = 0; i < ar.length; i++) {
+    val = !val || ar[i] < val ? ar[i] : val
+  }
+
+  return val
+}
+
+function highest (ar) {
+  var val
+
+  for (var i = 0; i < ar.length; i++) {
+    val = !val || ar[i] > val ? ar[i] : val
+  }
+
+  return val
+}

@@ -15,7 +15,7 @@ function renderCard (card) {
 }
 
 function renderHand (hand) {
-  var downCard = renderCard(hand.downCard)
+  var downCard = hand.downCards.map(renderCard).join(', ')
   var upCards = hand.upCards.map(renderCard).join(', ')
   var values = calculateValues(hand).join(', ') 
 
@@ -26,7 +26,9 @@ function renderHand (hand) {
 
 function renderPlayer (player) {
   var name = player.name
-  var hand = player.hand ? renderHand(player.hand) : 'no hand'
+  var hand = player.hands.length 
+    ? player.hands.map(renderHand).join('  ')
+    : 'no hand'
 
   return name + " has " + hand
 }

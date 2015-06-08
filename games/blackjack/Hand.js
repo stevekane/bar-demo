@@ -6,13 +6,17 @@ var addLists = fns.addLists
 
 module.exports = Hand
 
-function Hand (downCard, upCards) {
-  this.downCard = downCard
+function Hand (downCards, upCards) {
+  this.downCards = downCards
   this.upCards = upCards
 }
 
+Hand.Empty = function () {
+  return new Hand([], [])
+}
+
 Hand.calculateValues = function (hand) {
-  return hand.upCards.concat(hand.downCard)
+  return hand.upCards.concat(hand.downCards)
                      .map(pluck('values'))
                      .reduce(addLists)
 }

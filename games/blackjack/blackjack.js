@@ -3,61 +3,35 @@
 var renderConsole = require('./render-console')
 var render = renderConsole.renderBlackJack
 var fns = require('../utils/functions')
+var shuffle = fns.shuffle
+var lowest = fns.lowest
+var transactions = require('./transactions')
+var dealRound = transactions.dealRound
+var hit = transactions.hit
 var Hand = require('./Hand')
+var calculateValues = Hand.calculateValues
 var Shoe = require('./Shoe')
 var Player = require('./Player')
 var Dealer = require('./Dealer')
-var shuffle = fns.shuffle
 
 module.exports = BlackJack
 
 function BlackJack () {
   this.shoe = new Shoe.Scrambled
-  this.dealer = new Dealer
+  this.dealer = new Dealer(new Hand.Empty)
   this.players = []
 }
 
-// TRANSACTIONS!
-
-function dealRound (blackJack) {
-  if (!blackJack.players.length) return
-
-  for (var i = 0; i < blackJack.players.length; i++) {
-    blackJack.players[i].hand = new Hand(blackJack.shoe.pop(), 
-                                         [blackJack.shoe.pop()])
-  }
-  blackJack.dealer.hand = new Hand(blackJack.shoe.pop(), 
-                                   [blackJack.shoe.pop()])
-}
-
-function hit (shoe, hand) {
-  hand.upCards.push(shoe.pop())
-}
-
-//:: Player | Dealer
-function stand (target) {
-  //TODO: Player/Dealer should possibly have boolean flag for done?
-}
-
-// TRANSACTIONS -- END
-
+//:: target Player | Dealer
 var blackJack = new BlackJack
 
-// add new players
-// collect bets (duration)
-// deal
-// allow doubledown (duration)
-// allow hit/stand (duration)
-// deal the dealer 
-// calculate results and distribute chips (duration)
-
-blackJack.players.push(new Player('Steve', 100))
-blackJack.players.push(new Player('Lynn', 100))
-dealRound(blackJack)
+blackJack.players.push(new Player('Steve'))
+blackJack.players.push(new Player('Lynn'))
+dealRound(blackJack.shoe, blackJack.players, blackJack.dealer)
 console.log(render(blackJack))
-blackJack.players.push(new Player('Tom', 100))
-dealRound(blackJack)
+blackJack.players.push(new Player('Tom'))
+dealRound(blackJack.shoe, blackJack.players, blackJack.dealer)
 console.log(render(blackJack))
-dealRound(blackJack)
-hit(blackJack.shoe, blackJack.players[0].hand)
+dealRound(blackJack.shoe, blackJack.players, blackJack.dealer)
+hit(blackJack.shoe, blackJack.players[0].hands[0])
 console.log(render(blackJack))
