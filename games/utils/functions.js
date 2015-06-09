@@ -5,6 +5,7 @@ module.exports.addLists = addLists
 module.exports.shuffle = shuffle
 module.exports.lowest = lowest
 module.exports.highest = highest
+module.exports.surround = surround
 
 function pluck (attrName) {
   return function innerPluck (obj) {
@@ -48,4 +49,8 @@ function highest (ar) {
   }
 
   return val
+}
+
+function surround (str, left, right) {
+  return left + str + right
 }

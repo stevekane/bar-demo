@@ -14,7 +14,7 @@ var Player = require('./Player')
 var Dealer = require('./Dealer')
 
 var UPDATE_RATE = 100
-var RENDER_RATE = 1000
+var RENDER_RATE = 100
 
 module.exports = BlackJack
 

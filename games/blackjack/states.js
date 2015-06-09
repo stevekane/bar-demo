@@ -25,6 +25,8 @@ function CardDealing (game) {
   State.Timed.call(this, game, 'Dealing Cards', DEAL_DURATION)
 
   this.enter = function () {
+    //TODO: shohuld be able to fix to use inherited super class?
+    this.duration = DEAL_DURATION
     dealRound(this.game.shoe, this.game.players, this.game.dealer)
   }
 }
@@ -41,6 +43,7 @@ function CardCollecting (game) {
   State.Timed.call(this, game, 'Collecting Cards', COLLECTION_DURATION)
 
   this.enter = function () {
+    this.duration = COLLECTION_DURATION
     collectRound(this.game.shoe, this.game.players, this.game.dealer)
   }
 }

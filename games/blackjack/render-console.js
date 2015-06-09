@@ -1,5 +1,7 @@
 'use strict'
 
+var fns = require('../utils/functions')
+var surround = fns.surround
 var Hand = require('./Hand')
 var calculateValues = Hand.calculateValues
 
@@ -16,10 +18,11 @@ function renderCard (card) {
 
 function renderHand (hand) {
   var cards = hand.cards.map(renderCard).join(' ')
-  var values = calculateValues(hand).join(', ') 
+  var values = hand.cards.length 
+    ? surround(calculateValues(hand).join(', '), '{', '}')
+    : ""
 
-  return "\t" + cards + 
-         " (" + values + ")"
+  return "\t" + cards + " " + values
 }
 
 function renderPlayer (player) {
@@ -41,12 +44,21 @@ function renderShoe (shoe) {
   return "SHOE: " + shoe.length + " cards"
 }
 
+function printSeconds (value) {
+  return !value || value < 0
+    ? "0.00"
+    : String((value / 1000).toFixed(2))
+}
+
 function render (blackJack) {
+  var stateName = blackJack.stateManager.activeState.name
+  var duration = printSeconds(blackJack.stateManager.activeState.duration)
   var shoeText = renderShoe(blackJack.shoe)
   var dealerText = renderDealer(blackJack.dealer) 
   var playerText = blackJack.players.map(renderPlayer).join('\n')
 
-  return blackJack.stateManager.activeState.name + "\n" +
+  return stateName + "\n" +
+         duration + "\n" +
          shoeText + "\n" + 
          dealerText + "\n" +
          playerText

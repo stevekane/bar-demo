@@ -15,6 +15,12 @@ Hand.Empty = function () {
 }
 
 Hand.calculateValues = function (hand) {
-  return hand.cards.map(pluck('values'))
-                   .reduce(addLists, [])
+  if (!hand.cards.length) return []
+
+  var values = hand.cards[0].values
+
+  for (var i = 1; i < hand.cards.length; i++) {
+    values = addLists(values, hand.cards[i].values)
+  }
+  return values
 }
