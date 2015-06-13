@@ -20,13 +20,13 @@ function renderHand (hand) {
   var cards = hand.cards.map(renderCard).join(' ')
   var values = hand.cards.length 
     ? surround(calculateValues(hand).join(', '), '{', '}')
-    : ""
+    : ''
 
-  return "\t" + cards + " " + values
+  return '\t' + cards + ' ' + values
 }
 
 function renderPlayer (player) {
-  var name = player.name
+  var name = player.user.name
   var hand = player.hands.length 
     ? player.hands.map(renderHand).join('  ')
     : 'no hand'
@@ -37,16 +37,16 @@ function renderPlayer (player) {
 function renderDealer (dealer) {
   var hand = dealer.hand ? renderHand(dealer.hand) : 'no hand'
 
-  return "Dealer has " + hand
+  return 'Dealer has ' + hand
 }
 
 function renderShoe (shoe) {
-  return "SHOE: " + shoe.length + " cards"
+  return 'SHOE: ' + shoe.length + ' cards'
 }
 
 function printSeconds (value) {
   return !value || value < 0
-    ? "0.00"
+    ? '0.00'
     : String((value / 1000).toFixed(2))
 }
 
@@ -57,9 +57,9 @@ function render (blackJack) {
   var dealerText = renderDealer(blackJack.dealer) 
   var playerText = blackJack.players.map(renderPlayer).join('\n')
 
-  return stateName + "\n" +
-         duration + "\n" +
-         shoeText + "\n" + 
-         dealerText + "\n" +
+  return stateName + '\n' +
+         duration + '\n' +
+         shoeText + '\n' + 
+         dealerText + '\n' +
          playerText
 }

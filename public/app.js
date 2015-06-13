@@ -1,0 +1,1 @@
+console.error("Error: Cannot find module '/Users/stevenkane/personal/bar-demo/index.js' from '/Users/stevenkane/personal/bar-demo'");

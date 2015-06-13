@@ -2,8 +2,9 @@
 
 module.exports = State
 
-function State (game, name) {
+function State (engine, game, name) {
   this.name = name
+  this.engine = engine
   this.game = game
   this.enter = function () {}
   this.exit = function () {}
@@ -11,8 +12,8 @@ function State (game, name) {
   this.render = function () {}
 }
 
-State.Timed = function (game, name, duration) {
-  State.call(this, game, name)
+State.Timed = function (engine, game, name, duration) {
+  State.call(this, engine, game, name)
   this.duration = duration 
 
   this.update = function (dT) {
