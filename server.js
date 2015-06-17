@@ -5,7 +5,7 @@ const serveStatic = require('serve-static')
 const finalhandler = require('finalhandler')
 const Engine = require('./src/Engine')
 const Clock = require('./src/Clock')
-const BlackJack = require('./games/blackjack/BlackJack')
+const BlackJackServer = require('./games/blackjack/BlackJackServer')
 const serve = serveStatic('public/')
 const DEFAULT_PORT = 4005
 const PORT = process.env.PORT || DEFAULT_PORT
@@ -15,17 +15,13 @@ const httpServer = http.Server(function (req, res) {
 })
 const io = sio(httpServer)
 const engine = new Engine(new Clock)
-const bj = new BlackJack(engine)
+const game = new BlackJackServer(engine)
 
 function makeUpdate (eng, game) {
   return function update () {
     eng.clock.tick()           
-    game.update(engine, game)
-    io.to('loggedIn').emit('update', {
-      shoe: game.shoe,
-      players: game.players,
-      dealer: game.dealer
-    })
+    game.update(engine.clock.dT)
+    io.to('loggedIn').emit('update', game.state)
   }
 }
 
@@ -35,6 +31,7 @@ io.on('connection', function handleNewClient (socket) {
     console.log('Login ', data)
     socket.leave('loggingIn')
     socket.join('loggedIn')
+    socket.emit('begin', game.state)
   })
   socket.on('logout', function handleLogout () {
     socket.leave('loggedIn') 
@@ -44,5 +41,5 @@ io.on('connection', function handleNewClient (socket) {
   })
 })
 
-setInterval(makeUpdate(engine, bj), 66)
+setInterval(makeUpdate(engine, game), 66)
 httpServer.listen(PORT, prettyLog.log.bind(null, PORT))
