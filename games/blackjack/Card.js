@@ -1,5 +1,7 @@
 'use strict'
 
+var Entity = require('./Entity')
+
 module.exports = Card
 
 function CardValue (name, values) {
@@ -24,6 +26,7 @@ var cardValues = [
 ]
 
 function Card (suit, name, values) {
+  Entity.call(this)
   this.suit = suit
   this.name = name
   this.values = values

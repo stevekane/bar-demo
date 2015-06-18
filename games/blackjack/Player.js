@@ -1,12 +1,13 @@
 'use strict'
 
-var Hand = require('./Hand')
+var Entity = require('./Entity')
 
 module.exports = Player
 
 function Player (user) {
+  Entity.call(this)
   this.user = user
-  this.hands = [new Hand.Empty]
+  this.hands = []
   this.currentBet = 0
   this.doneBetting = false
   this.donePostDeal = false

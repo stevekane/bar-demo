@@ -6,6 +6,8 @@ module.exports.shuffle = shuffle
 module.exports.lowest = lowest
 module.exports.highest = highest
 module.exports.surround = surround
+module.exports.remove = remove
+module.exports.append = append
 
 function pluck (attrName) {
   return function innerPluck (obj) {
@@ -53,4 +55,15 @@ function highest (ar) {
 
 function surround (str, left, right) {
   return left + str + right
+}
+
+function remove (array, obj) {
+  array.splice(array.indexOf(obj), 1)
+}
+
+function append (array1, array2) {
+  for (var i = 0; i < array2.length; i++) {
+    array1.push(array2[i]) 
+  }
+  return array1
 }

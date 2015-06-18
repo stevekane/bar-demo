@@ -1,9 +1,6 @@
 'use strict'
 
-module.exports.onEnter = onEnter
-module.exports.onExit = onExit
-module.exports.update = update
-module.exports.render = render
+module.exports = ActionState
 
 function onEnter (blackJack) {
   console.log('entered action')  
@@ -20,3 +17,5 @@ function update (dT, blackJack) {
 function render (blackJack) {
   console.log('action render') 
 }
+
+
