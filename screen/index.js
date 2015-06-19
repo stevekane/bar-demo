@@ -1,29 +1,30 @@
 'use strict'
 
-var react = require('react')
 var sio = require('socket.io-client')
-var prettyLog = require('pretty-log-2')
-var components = require('./components')
-var Game = require('../games/blackjack/BlackJack')
-var MainComponent = components.MainComponent
-var SERVER_ADDRESS = 'http://localhost:4005'
+var loading = require('./loading')
+var loadJSON = loading.loadJSON
+var loadImage = loading.loadImage
+var SERVER_ADDRESS = window.location.origin + '/screens'
 var socket = sio(SERVER_ADDRESS)
-var game = new Game(false);
 
-socket.on('connect', function (ev) {
-  socket.emit('login', {name: 'Steve', password: 'Booty'})
-  socket.on('begin', function handleBegin (data) {
-    console.log('begin');
-    //requestAnimationFrame(makeRender())
-  })
-  socket.on('update', function handleUpdate (data) {
-    game.state = data
-  })
-})
+function loadAssets () {
+  return Promise.all([
+    loadImage(window.location.origin + '/images/playingCards.png'),
+    loadJSON(window.location.origin + '/json/playingCards.json')
+  ])
+}
 
-//function makeRender () {
-//  return function render () {
-//    react.render(MainComponent(game.state), document.body)
-//    requestAnimationFrame(render)
-//  }
-//}
+function boot (assets) {
+  var socket = sio(SERVER_ADDRESS)
+  var timerNode = document.getElementById('timer') 
+
+  socket.on('connect', function (ev) {
+    console.log(window.navigator.userAgent)
+    socket.on('update', function (state, events) { 
+      timerNode.innerText = Math.ceil(state.timeLeft / 1000)
+    })
+  })
+}
+
+loadAssets()
+.then(boot)

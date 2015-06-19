@@ -2,9 +2,7 @@
 
 module.exports = State
 
-function State (duration) {
-  this.duration = duration
-}
+function State () {}
 
 State.prototype.onEnter = function (game) {}
 State.prototype.onExit = function (game) {}
