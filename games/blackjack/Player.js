@@ -4,10 +4,10 @@ var Entity = require('./Entity')
 
 module.exports = Player
 
-function Player (user) {
+function Player () {
   Entity.call(this)
-  this.user = user
   this.hands = []
+  this.chips = 10000
   this.currentBet = 0
   this.doneBetting = false
   this.donePostDeal = false

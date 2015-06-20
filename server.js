@@ -18,7 +18,7 @@ const engine = {
   clock: new Clock,
   events: [],
   screens: io.of('/screens'),
-  clients: io.of('/clients') 
+  clients: io.of('/clients')
 }
 const game = new BlackJack(engine)
 
@@ -34,8 +34,20 @@ function makeUpdate (game) {
 
 engine.clients.on('connection', function handleNewClient (socket) {
   console.log('client added', socket.id)
+
+  socket.events = []
+  socket.active = false
   socket.on('disconnect', function handleClientDisconnect () {
     console.log('client removed', socket.id)
+  })
+  socket.on('bet', function handleBet (amount) {
+    socket.events.push({type: 'bet', amount: amount})
+  })
+  socket.on('hit', function handleHit () {
+    socket.events.push({type: 'hit'}) 
+  })
+  socket.on('stand', function handleStand () {
+    socket.events.push({type: 'stand'}) 
   })
 })
 

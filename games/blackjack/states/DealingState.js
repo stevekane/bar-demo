@@ -1,24 +1,26 @@
 'use strict'
 
 var State = require('../State')
+var Hand = require('../Hand')
+var Card = require('../Card')
 var TransitionEvent = require('../events/TransitionEvent')
 
-module.exports = BettingState
+module.exports = DealingState
 
-function BettingState (duration) {
+function DealingState (duration) {
   State.call(this)
   this.duration = duration
 }
 
-BettingState.prototype = Object.create(State.prototype)
+DealingState.prototype = Object.create(State.prototype)
 
-BettingState.prototype.onEnter = function (blackJack) {
-  console.log('entered betting')  
+DealingState.prototype.onEnter = function (blackJack) {
+  console.log('entered dealing')  
+  blackJack.state.dealer.hand = new Hand([new Card.Random(), new Card.Random()])
   blackJack.state.timeLeft = this.duration
-  console.log(blackJack.state.players)
 }
 
-BettingState.prototype.update = function (dT, blackJack) {
+DealingState.prototype.update = function (dT, blackJack) {
   var activeStateName = blackJack.state.activeStateName
   var nextStateName = blackJack.states.nextKey(activeStateName)
 

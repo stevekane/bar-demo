@@ -1,6 +1,8 @@
 'use strict'
 
 var Entity = require('./Entity')
+var fns = require('../utils/functions')
+var randFrom = fns.randFrom
 
 module.exports = Card
 
@@ -32,18 +34,9 @@ function Card (suit, name, values) {
   this.values = values
 }
 
-//constructor that returns entire standard 52-card deck
-Card.Deck = function () {
-  var deck = []
-  var suit
-  var cardValue
+Card.Random = function () {
+  var suit = randFrom(suits)
+  var value = randFrom(cardValues)
 
-  for (var i = 0; i < suits.length; i++) {
-    for (var j = 0; j < cardValues.length; j++) {
-      suit = suits[i]
-      cardValue = cardValues[j]
-      deck.push(new Card(suit, cardValue.name, cardValue.values))
-    } 
-  }
-  return deck 
+  return new Card(suit, value.name, value.values)
 }

@@ -8,6 +8,7 @@ module.exports.highest = highest
 module.exports.surround = surround
 module.exports.remove = remove
 module.exports.append = append
+module.exports.randFrom = randFrom
 
 function pluck (attrName) {
   return function innerPluck (obj) {
@@ -66,4 +67,8 @@ function append (array1, array2) {
     array1.push(array2[i]) 
   }
   return array1
+}
+
+function randFrom (array) {
+  return array[Math.floor(Math.random() * array.length)]
 }
