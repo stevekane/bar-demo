@@ -1,7 +1,9 @@
 'use strict'
 
+var react = require('react')
 var sio = require('socket.io-client')
 var loading = require('./loading')
+var components = require('./components')
 var loadJSON = loading.loadJSON
 var loadImage = loading.loadImage
 var SERVER_ADDRESS = window.location.origin + '/screens'
@@ -16,18 +18,10 @@ function loadAssets () {
 function boot (assets) {
   var socket = sio(SERVER_ADDRESS)
   var timerNode = document.getElementById('timer') 
-  var dealerNode = document.getElementById('dealer-cards')
 
   socket.on('connect', function (ev) {
     console.log(window.navigator.userAgent)
     socket.on('update', function (state, events) { 
-      var hand = state.dealer.hand
-
-      if (hand) {
-        dealerNode.innerText = hand.cards.reduce(function (str, card) {
-          return str ? str + ', ' + card.name + card.suit : card.name + card.suit
-        }, "")
-      }
       timerNode.innerText = Math.ceil(state.timeLeft / 1000)
     })
   })

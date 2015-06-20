@@ -29,6 +29,9 @@ function makeUpdate (game) {
     engine.screens.emit('update', game.state, engine.events)
     engine.clients.emit('update', game.state, engine.events)
     engine.events.splice(0)
+    for (var i = 0; i < engine.clients.sockets.length; i++) {
+      engine.clients.sockets[i].events.splice(0) 
+    }
   }
 }
 
@@ -36,7 +39,7 @@ engine.clients.on('connection', function handleNewClient (socket) {
   console.log('client added', socket.id)
 
   socket.events = []
-  socket.active = false
+
   socket.on('disconnect', function handleClientDisconnect () {
     console.log('client removed', socket.id)
   })
@@ -58,5 +61,5 @@ engine.screens.on('connection', function handleNewScreen (socket) {
   })
 })
 
-setInterval(makeUpdate(game), 100)
+setInterval(makeUpdate(game), 300)
 httpServer.listen(PORT, '0.0.0.0')

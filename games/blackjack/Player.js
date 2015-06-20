@@ -9,7 +9,5 @@ function Player () {
   this.hands = []
   this.chips = 10000
   this.currentBet = 0
-  this.doneBetting = false
-  this.donePostDeal = false
-  this.doneActions = false
+  this.done = false
 }

@@ -23,33 +23,29 @@ function BlackJack (engine) {
     activeStateName: this.states.firstKey(),
     timeLeft: this.states.first().duration,
     dealer: new Dealer,
-    players: []
+    players: [],
+    activePlayers: []
   }
 }
 
-function doTransition (game, from, to) {
-  game.states.get(from).onExit(game)
-  game.state.activeStateName = to
-  game.states.get(to).onEnter(game)
-}
+BlackJack.prototype.transitionTo = function (to) { 
+  var from = this.state.activeStateName
 
-function processEvent (game, event) {
-  switch (event.type) {
-    case 'transition': return doTransition(game, event.from, event.to)
-    case 'create': return doAdd(game, event.type, event.entity)
-    case 'remove': return doRemove(game, event.type, event.entity)
-  } 
+  this.states.get(from).onExit(this)
+  this.state.activeStateName = to
+  this.states.get(to).onEnter(this)
 }
 
 BlackJack.prototype.update = function (dT) {
-  var events = this.engine.events
   var activeState = this.states.get(this.state.activeStateName)
   var clients = this.engine.clients
   var players = this.state.players
+  var activePlayers = this.state.activePlayers
   var map = this.socketToPlayerMap
   var socket
   var player
 
+  activePlayers.splice(0)
   players.splice(0)
 
   for (var i = 0; i < clients.sockets.length; i++) {
@@ -58,11 +54,8 @@ BlackJack.prototype.update = function (dT) {
 
     map.set(socket, player)
     players.push(this.socketToPlayerMap.get(socket))
+    if (player.currentBet > 0) activePlayers.push(player)
   }
-  activeState.update(dT, this)
 
-  for (var i = 0; i < events.length; i++) {
-    processEvent(this, events[i]) 
-  }
-  //broadcast to clients
+  activeState.update(dT, this)
 }

@@ -15,7 +15,15 @@ function DealingState (duration) {
 DealingState.prototype = Object.create(State.prototype)
 
 DealingState.prototype.onEnter = function (blackJack) {
-  console.log('entered dealing')  
+  var activePlayers = blackJack.state.activePlayers
+  var player 
+
+  for (var i = 0; i < activePlayers.length; i++) {
+    player = activePlayers[i]
+
+    player.hands.splice(0)
+    player.hands.push(new Hand([new Card.Random(), new Card.Random()]))
+  }
   blackJack.state.dealer.hand = new Hand([new Card.Random(), new Card.Random()])
   blackJack.state.timeLeft = this.duration
 }
@@ -26,6 +34,6 @@ DealingState.prototype.update = function (dT, blackJack) {
 
   blackJack.state.timeLeft -= dT
   if (blackJack.state.timeLeft <= 0) {
-    blackJack.engine.events.push(new TransitionEvent(activeStateName, nextStateName))
+    blackJack.transitionTo(nextStateName)
   }
 }

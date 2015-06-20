@@ -9,3 +9,15 @@ socket.on('connect', function (ev) {
   socket.on('update', function (state, events) { 
   })
 })
+
+window.bet = function (amount) {
+  socket.emit('bet', amount)
+}
+
+window.stand = function () {
+  socket.emit('stand')
+}
+
+window.hit = function () {
+  socket.emit('hit')
+}
