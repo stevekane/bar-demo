@@ -6,6 +6,7 @@ module.exports = Player
 
 function Player () {
   Entity.call(this)
+
   this.hands = []
   this.chips = 10000
   this.currentBet = 0

@@ -4,9 +4,13 @@ var react = require('react')
 var sio = require('socket.io-client')
 var loading = require('./loading')
 var components = require('./components')
+var MainComponent = components.MainComponent
 var loadJSON = loading.loadJSON
 var loadImage = loading.loadImage
 var SERVER_ADDRESS = window.location.origin + '/screens'
+var game = {
+  state: null
+}
 
 function loadAssets () {
   return Promise.all([
@@ -17,14 +21,21 @@ function loadAssets () {
 
 function boot (assets) {
   var socket = sio(SERVER_ADDRESS)
-  var timerNode = document.getElementById('timer') 
 
   socket.on('connect', function (ev) {
     console.log(window.navigator.userAgent)
     socket.on('update', function (state, events) { 
-      timerNode.innerText = Math.ceil(state.timeLeft / 1000)
+      game.state = state
     })
   })
+  render()
+}
+
+function render () {
+  if (game.state) {
+    react.render(MainComponent(game.state), document.body)
+  }
+  requestAnimationFrame(render)
 }
 
 loadAssets()

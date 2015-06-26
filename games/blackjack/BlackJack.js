@@ -6,25 +6,50 @@ var DealingState = require('./states/DealingState')
 var State = require('./State')
 var Dealer = require('./Dealer')
 var Player = require('./Player')
+var fns = require('../utils/functions')
+var remove = fns.remove
 
 var MAX_WAIT = Number.MAX_SAFE_INTEGER
 
 module.exports = BlackJack
 
 function BlackJack (engine) {
-  this.socketToPlayerMap = new WeakMap
+  var players = []
+  var activePlayers = []
+  var socketToPlayerMap = new WeakMap
+  var playerToSocketMap = new WeakMap
+
+  engine.clients.on('connection', function registerClient (socket) {
+    var player = new Player
+
+    function handleDisconnect () { remove(players, player) }
+    function handleBet () { socket.events.push({type: 'bet'}) }
+    function handleHit () { socket.events.push({type: 'hit'}) }
+    function handleStand () { socket.events.push({type: 'stand'}) }
+
+    socket.events = []
+    socketToPlayerMap.set(socket, player)
+    playerToSocketMap.set(player, socket)
+    players.push(player)
+
+    socket.on('disconnect', handleDisconnect)
+    socket.on('bet', handleBet)
+    socket.on('hit', handleHit)
+    socket.on('stand', handleStand)
+  })
+
   this.engine = engine
+  this.socketToPlayerMap = socketToPlayerMap
+  this.playerToSocketMap = playerToSocketMap
   this.states = new CircularOrderedDict
   this.states.append('betting', new BettingState(6000))
   this.states.append('dealing', new DealingState(2000))
-  //this.states.append('scoring', new State(5000))
-
   this.state = {
     activeStateName: this.states.firstKey(),
     timeLeft: this.states.first().duration,
     dealer: new Dealer,
-    players: [],
-    activePlayers: []
+    players: players,
+    activePlayers: activePlayers 
   }
 }
 
@@ -47,6 +72,9 @@ BlackJack.prototype.update = function (dT) {
 
   activePlayers.splice(0)
   players.splice(0)
+
+  //loop over all sockets checking if they exist in the map already
+  //if they do, make sure that player is in the playerlist
 
   for (var i = 0; i < clients.sockets.length; i++) {
     socket = clients.sockets[i]

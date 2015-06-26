@@ -4,8 +4,36 @@
     <title>Bar games</title> 
   </head>
   <body>
-    <h1>CLIENT</h1>
-    <p id="timer"></p>
+    <style>
+      html {
+        height: 100%; 
+      }
+      body {
+        height: 100%;
+        padding: 0px;
+        margin: 0px;
+      }
+      .big-btn {
+        display: inline-block;
+        height: 100%;
+        width: 33%; 
+        font-size: 500%;
+        color: white;
+        text-align: center;
+      } 
+      #bet {
+        background-color: green; 
+      }
+      #hit {
+        background-color: red; 
+      }
+      #stand {
+        background-color: blue; 
+      }
+    </style>
+    <div class="big-btn" id="bet">BET</div>
+    <div class="big-btn" id="hit">HIT</div>
+    <div class="big-btn" id="stand">STAND</div>
     <script src="client.js"></script>
   </body>
 </html>
