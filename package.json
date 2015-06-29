@@ -7,6 +7,7 @@
     "test": "node test",
     "watch-screen": "watchify -d -o public/screen.js screen/index.js",
     "watch-client": "watchify -d -o public/client.js client/index.js",
+    "run-transpile": "babel test-transpile.js | node",
     "watch": "npm run watch-screen & npm run watch-client & nodemon server.js"
   },
   "repository": {
