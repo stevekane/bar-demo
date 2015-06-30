@@ -22,7 +22,8 @@ const CARDS = new Enum('Ace', 'Two', 'Three', 'Four', 'Five',
                        'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Jack',
                        'Queen', 'King')
 const CARD_VALUES = [
-  [1, 11], [2], [3], [4], [5], [6], [7], [8], [9],
+  [1, 11], [2], [3], [4], 
+  [5], [6], [7], [8], [9],
   [10], [10], [10], [10]
 ]
 
@@ -70,7 +71,7 @@ function remove (array, obj) {
   array.splice(array.indexOf(obj), 1)
 }
 
-//TODO: maybe make this use the magical arguments object?
+//TODO: make this use the magical arguments object to support abritrary arity?
 function addLists (list1, list2) {
   var results = []
 
@@ -267,7 +268,7 @@ function hit (store, hand) {
   cards = store.getChildrenByType(hand, Card)
   values = calculateValues(cards)  
 
-  if (lowest(values) > 21)       hand.status = STATUS.Busted
+  if      (lowest(values) > 21)  hand.status = STATUS.Busted
   else if (contains(values, 21)) hand.status = STATUS.BlackJack
   else                           hand.status = hand.status
 }
