@@ -52,11 +52,32 @@ class Store {
     this.entities = []
   }
 
+  getByType (Ctor) {
+    var query = []
+    var ent 
+
+    for (var i = 0; i < this.entities.length; i++) {
+      ent = this.entities[i]
+      if (ent instanceof Ctor) query.push(ent)
+    }
+    return query
+  }
+  
   getById (id) {
     return findWhere('id', id, this.entities) 
   }
 
   getChildByType (entity, Ctor) {
+    var child 
+
+    for (var i = 0; i < entity.childIds.length; i++) {
+      child = this.getById(entity.childIds[i])
+      if (child instanceof Ctor) return child
+    }
+    return null
+  }
+
+  getChildrenByType (entity, Ctor) {
     var query = []
     var child 
 
@@ -64,7 +85,6 @@ class Store {
       child = this.getById(entity.childIds[i])
       if (child instanceof Ctor) query.push(child)
     }
-
     return query
   }
 
@@ -116,9 +136,10 @@ class Card extends Entity {
 }
 
 class Hand extends Entity {
-  constructor () {
+  constructor (betValue, status=STATUS.Active) {
     super('Hand')
-    this.status = STATUS.Active
+    this.betValue = betValue
+    this.status = status
   }
 }
 
@@ -126,7 +147,6 @@ class Player extends Entity {
   constructor (chipCount) {
     super('Player')
     this.chipCount = chipCount
-    this.currentBet = 0
   }
 }
 
@@ -137,31 +157,49 @@ class Dealer extends Entity {
 }
 
 function cleanupPlayer (store, player) {
-  let hands = store.getChildByType(player, Hand)
+  let hands = store.getChildrenByType(player, Hand)
   let totalHands = hands.length
   let i = -1
 
-  while (++i < totalHands) {
-    store.remove(hands[i])
+  while (++i < totalHands) store.remove(hands[i])
+}
+
+function cleanupRound (store) {
+  let dealer = store.getChildByType(store.root, Dealer)
+  let players = store.getChildrenByType(store.root, Player)
+
+  cleanupPlayer(store, dealer)
+  for (var i = 0; i < players.length; i++) {
+    cleanupPlayer(store, players[i])
   }
 }
 
-function deal (store, player) {
-  let newHand = new Hand
+function dealPlayer (store, betValue, player) {
+  let newHand = new Hand(betValue, STATUS.Active)
   let card1 = new Card.Random
   let card2 = new Card.Random
 
-  player.status = STATUS.Active
+  player.chipCount = max(player.chipCount - MIN_BET, 0)
   store.attach(player, newHand)
   store.attach(newHand, card1)
   store.attach(newHand, card2)
 }
 
-function bet (store, player) {
-  if (player.currentBet > 0) return
+function dealRound (store) {
+  let dealer = store.getChildByType(store.root, Dealer)
+  let players = store.getChildrenByType(store.root, Player)
+  
+  dealPlayer(store, MIN_BET, dealer)
+  for (var i = 0; i < players.length; i++) {
+    dealPlayer(store, 0, players[i])
+  }
+}
 
-  player.currentBet = MIN_BET
-  player.chipCount = max(player.chipCount - MIN_BET, 0)
+function bet (store, player, hand) {
+  if (hand.betValue > 0) return
+
+  hand.currentBet = MIN_BET
+  hand.chipCount = max(player.chipCount - MIN_BET, 0)
 }
 
 function stand (store, hand) {
@@ -178,22 +216,19 @@ function hit (store, hand) {
   store.attach(hand, new Card.Random)
 }
 
-//lookup owner of hand
-//create new hand with 1 card from previous hand
-//add chips for bet on new hand
-//hit both hands
 function split (store, hand) {
-  if (hand.status !== STATUS.Active) return
-
   let owner = store.getById(hand.parentId)
-  let cardToMove = store.getChildByType(hand, Card)[1]
-  let newHand = new Hand
+  let cards = store.getChildrenByType(hand, Card)
+  let newHand = new Hand(MIN_BET, STATUS.Active)
 
+  if (cards.length > 2) return console.log('More than 2 cards')
+  if (cards[0].name !== cards[1].name) return console.log('Not same value!')
+  if (hand.status !== STATUS.Active) return
   if (!owner) return
-  if (!cardToMove) return
   
+  owner.chipCount = max(owner.chipCount - MIN_BET, 0)
   store.attach(owner, newHand)
-  store.attach(newHand, cardToMove)
+  store.attach(newHand, cards[1])
   store.attach(hand, new Card.Random)
   store.attach(newHand, new Card.Random)
 }
@@ -204,13 +239,14 @@ function doubleDown (store, player) {
 
 let store = new Store
 let dealer = new Dealer
-let player = new Player(500)
+let player = new Player(5000)
 
 store.attach(store.root, dealer)
 store.attach(store.root, player)
 
-deal(store, player)
-split(store, store.getChildByType(player, Hand)[0])
-pp(store)
-cleanupPlayer(store, player)
+dealRound(store)
+split(store, store.getChildrenByType(player, Hand)[0])
+pp(store.getByType(Card))
+cleanupRound(store)
+pp(store.getByType(Card))
 pp(store)
