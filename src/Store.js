@@ -7,6 +7,27 @@ export default class Store {
   constructor () {
     this.root = new Entity('root')
     this.entities = []
+    this.where = function*(predFn) {
+      let entities = this.entities
+      let index = -1 
+
+      while ( ++index < entities.length ){
+        let ent = entities[index]
+
+        if (predFn(ent)) yield ent
+      }
+    }
+    this.childrenWhere = function*(predFn, entity) {
+      let self = this
+      let index = -1
+
+      while ( ++index < entity.childIds.length ) {
+        let childId = entity.childIds[index]
+        let child = self.getById(childId)
+        
+        if (predFn(child)) yield child
+      }
+    }
   }
 
   getById (id) {
@@ -20,55 +41,14 @@ export default class Store {
   firstChild (predFn, entity) {
     for (var i = 0; i < entity.childIds.length; i++) {
       let child = this.getById(entity.childIds[i])
+
       if (predFn(child)) return child
     }
     return null
   }
 
-  where (predFn) {
-    let self = this
-    let query = {}
-
-    query[Symbol.iterator] = function () {
-      return {
-        index: -1,
-        next () {
-          while ( ++this.index < self.entities.length ) {
-            let ent = self.entities[this.index]
-            
-            if (predFn(ent)) return {done: false, value: ent} 
-          }
-          return {done: true}
-        } 
-      }
-    }
-    return query
-  }
-
-  childrenWhere (predFn, entity) {
-    let self = this
-    let query = {}
-
-    query[Symbol.iterator] = function () {
-      return {
-        index: -1,
-        next () {
-          while ( ++this.index < entity.childIds.length ) {
-            let childId = entity.childIds[this.index]
-            let child = self.getById(childId)
-            
-            if (predFn(child)) return {done: false, value: child} 
-          }
-          return {done: true}
-        } 
-      }
-    }
-    return query
-  }
-
   remove (entity) {
     let parentEntity = this.getById(entity.parentId)
-    let ent
 
     while (entity.childIds.length > 0) {
       this.remove(this.getById(entity.childIds[0])) 

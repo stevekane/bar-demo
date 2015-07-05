@@ -4,7 +4,6 @@ const {min, max} = Math
 
 export {doLists, lowest, highest, findWhere, contains, remove}
 
-//monadic list operation
 function doLists (fn, list1, list2) {
   var results = []
 
@@ -26,7 +25,7 @@ function lowest (array) {
 function highest (array) {
   let val = 0
 
-  for (let val of array) val = max(val, item)
+  for (let item of array) val = max(val, item)
   return val
 }
 

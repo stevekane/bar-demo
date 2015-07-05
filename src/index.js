@@ -4,13 +4,15 @@ import SocketServer from 'socket.io'
 import servStatic from 'serve-static'
 import finalHandler from 'finalHandler'
 import {doLists, lowest, contains, remove} from './utils/array'
+import {instanceOf} from './utils/objects'
+import {sum} from './utils/math'
 import {Card, Hand, Player, Dealer} from './Entities'
 import Clock from './Clock'
 import Enum from './Enum'
 import Entity from './Entity'
 import Store from './Store'
 
-const {min, max, floor, random} = Math
+const {max} = Math
 
 const handleRequest = (req, res) => server(req, res, finalHander(req, res))
 const httpServer = Server(handleRequest)
@@ -63,18 +65,11 @@ const isHand = instanceOf(Hand)
 const isPlayer = instanceOf(Player)
 const isCard = instanceOf(Card)
 const isDealer = instanceOf(Dealer)
-const sum = (a, b) => a + b
 
 class BlackJackTable extends Store {
   constructor () {
     super()
     this.attach(this.root, new Dealer)
-  }
-}
-
-function instanceOf (Ctor) {
-  return function innerInstanceOf (obj) {
-    return obj instanceof Ctor  
   }
 }
 
@@ -174,10 +169,10 @@ function doubleDown (store, hand) {
 
 let table = new BlackJackTable
 let player1 = new Player(5000)
-//let player2 = new Player(5000)
+let player2 = new Player(5000)
 
 table.attach(table.root, player1)
-//table.attach(table.root, player2)
+table.attach(table.root, player2)
 
 dealRound(table)
 
@@ -186,10 +181,11 @@ let targetHand = table.firstChild(isHand, player1)
 hit(table, targetHand)
 hit(table, targetHand)
 hit(table, targetHand)
-//hit(table, targetHand)
 
 split(table, table.firstChild(isHand, player1))
-//doubleDown(table, table.firstChild(isHand, player2))
-//pp(table)
+doubleDown(table, table.firstChild(isHand, player2))
+pp(table)
 cleanupRound(table)
-//pp(table)
+pp(table)
+log(table.foo)
+log(table)
