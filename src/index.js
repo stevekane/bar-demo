@@ -66,12 +66,13 @@ const isPlayer = instanceOf(Player)
 const isCard = instanceOf(Card)
 const isDealer = instanceOf(Dealer)
 
-class BlackJackTable extends Store {
-  constructor () {
-    super()
-    this.attach(this.root, new Dealer)
-  }
+function BlackJackTable (dealer) {
+  Store.call(this)
+  this.attach(this.root, dealer) 
 }
+
+BlackJackTable.prototype = Object.create(Store.prototype)
+BlackJackTable.prototype.constructor = BlackJackTable
 
 function calculateChipCount (bet, chipCount) {
   return max(chipCount - bet, 0)
@@ -167,7 +168,7 @@ function doubleDown (store, hand) {
   hit(store, hand)
 }
 
-let table = new BlackJackTable
+let table = new BlackJackTable(new Dealer)
 let player1 = new Player(5000)
 let player2 = new Player(5000)
 
@@ -187,5 +188,3 @@ doubleDown(table, table.firstChild(isHand, player2))
 pp(table)
 cleanupRound(table)
 pp(table)
-log(table.foo)
-log(table)

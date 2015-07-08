@@ -1,12 +1,5 @@
 'use strict'
 
-class Enum {
-  constructor () {
-    let args = Array.prototype.slice.call(arguments, 0)
-    let i = -1
-
-    while (++i < args.length) this[args[i]] = i
-  }
+export default function Enum (...args) {
+  for (var i = 0; i < args.length; i++) this[args[i]] = i
 }
-
-module.exports = Enum
