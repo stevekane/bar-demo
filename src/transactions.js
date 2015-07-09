@@ -25,7 +25,7 @@ function calculateValues (cards) {
 }
 
 export function cleanupDealer (dealer) {
-  dealers.hand = null
+  dealer.hand = null
 }
 
 export function cleanupPlayer (player) {
@@ -60,9 +60,8 @@ export function dealRound (gameState) {
 }
 
 export function stand (hand) {
-  hand.status = hand.status !== HAND_STATUS.Active 
-    ? hand.status 
-    : HAND_STATUS.Standing
+  if (hand.status !== HAND_STATUS.Active) return log('Not active')
+  hand.status = HAND_STATUS.Standing
 }
 
 export function hit (hand) {
