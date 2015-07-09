@@ -1,0 +1,53 @@
+message Card {
+  enum Suit {
+    Diamonds = 0;
+    Hearts = 1;
+    Spades = 2;
+    Clubs = 3;
+  }
+  enum Rank {
+    Ace = 0;
+    Two = 1;
+    Three = 2;
+    Four = 3;
+    Five = 4;
+    Six = 5;
+    Seven = 6;
+    Eight = 7;
+    Nine = 8;
+    Ten = 9;
+    Jack = 10;
+    Queen = 11;
+    King = 12;
+  }
+
+  required Suit suit = 1;
+  required Rank rank = 2;
+}
+
+message Hand {
+  enum Status {
+    Active = 0;
+    Standing = 1;     
+    Busted = 2;
+  }
+  required Status status = 1;
+  required bool doubledDown = 2;
+  required int32 bet = 3;
+  repeated Card cards = 4;
+}
+
+message Player {
+  required string id = 1; 
+  required int32 chipCount = 2;
+  repeated Hand hands = 3;
+}
+
+message Dealer {
+  optional Hand hand = 1;
+}
+
+message GameState {
+  Dealer dealer = 1;
+  repeated Player players = 2;
+}
