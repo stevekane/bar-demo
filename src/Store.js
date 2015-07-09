@@ -1,7 +1,7 @@
 'use strict'
 
 import Entity from './Entity'
-import {contains, remove as removeArray, findWhere} from './utils/array'
+import {contains, remove, find, findWhere} from './utils/array'
 
 export default class Store {
   constructor() {
@@ -64,8 +64,8 @@ export default class Store {
       store.remove(store.getById(entity.childIds[0])) 
     }
 
-    if (parentEntity)                     removeArray(parentEntity.childIds, entity.id)
-    if (contains(store.entities, entity)) removeArray(store.entities, entity)
+    if (parentEntity)                     remove(parentEntity.childIds, entity.id)
+    if (contains(store.entities, entity)) remove(store.entities, entity)
     entity.parentId = null
   }
 
@@ -74,7 +74,7 @@ export default class Store {
     let oldParent = store.getById(entity.parentId)
 
     if (!contains(store.entities, entity)) store.entities.push(entity) 
-    if (oldParent)                         removeArray(oldParent.childIds, entity.id)
+    if (oldParent)                         remove(oldParent.childIds, entity.id)
 
     entity.parentId = targetEntity.id
     targetEntity.childIds.push(entity.id)

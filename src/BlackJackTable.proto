@@ -1,0 +1,47 @@
+message Card {
+  required string id = 1;
+  string type = 2;
+  string suit = 3;
+  string name = 4;
+  string parentId = 5; 
+  repeated string childIds = 6;
+}
+
+message Hand {
+  enum Status {
+    Active = 0;
+    Standing = 1;
+    Busted = 2;
+    BlackJack = 3;
+  }
+
+  required string id = 1;
+  string type = 2;
+  int32 betValue = 3;
+  Status status = 4;
+  bool doubledDown = 5;
+  string parentId = 6; 
+  repeated string childIds = 7;
+}
+
+message Player {
+  required string id = 1;
+  string type = 2;
+  int32 chipCount = 3;
+  string parentId = 4; 
+  repeated string childIds = 5;
+}
+
+message Dealer {
+  required string id = 1;  
+  string type = 2;
+  string parentId = 3; 
+  repeated string childIds = 4;
+}
+
+message BlackJackTable {
+  repeated Card cards = 1; 
+  repeated Hand hands = 2;
+  repeated Player players = 3;
+  Dealer dealer = 4;
+}

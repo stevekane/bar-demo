@@ -32,6 +32,7 @@
     "node-clone": "^0.1.1",
     "node-uuid": "^1.4.3",
     "pretty-log-2": "^1.0.0",
+    "protobufjs": "^4.0.0",
     "serve-static": "^1.9.3",
     "socket.io": "^1.3.5"
   },
