@@ -2,155 +2,110 @@
 
 import {pp, log} from 'pretty-log-2'
 import {doLists, lowest, contains, remove} from './utils/array'
-import {Card, Hand, Player, Dealer} from './Entities'
+import {Card, Hand, Player, Dealer} from './GameState'
 import {isHand, isPlayer, isCard, isDealer} from './predicates'
 import {sum} from './utils/math'
-import Enum from './Enum'
-
-const MIN_BET = 500
-const Ace = 'Ace'
-const One = 'One'
-const Two = 'Two'
-const Three = 'Three'
-const Four = 'Four'
-const Five = 'Five'
-const Six = 'Six'
-const Seven = 'Seven'
-const Eight = 'Eight'
-const Nine = 'Nine'
-const Ten = 'Ten'
-const Jack = 'Jack'
-const Queen = 'Queen'
-const King = 'King'
-
-const Diamonds = 'Diamonds'
-const Hearts = 'Hearts'
-const Spades = 'Spades'
-const Clubs = 'Clubs'
-
-const STATUS = new Enum('Active', 'Standing', 'Busted', 'BlackJack')
-const SUITS = [Diamonds, Hearts, Spades, Clubs]
-const CARDS = [Ace, Two, Three, Four, Five, Six, Seven,
-               Eight, Nine, Ten, Jack, Queen, King]
-
-const CARD_VALUES = new Map([
-  [Ace, [1, 11]],
-  [Two, [2]],
-  [Three, [3]],
-  [Four, [4]],
-  [Five, [5]],
-  [Six, [6]],
-  [Seven, [7]],
-  [Eight, [8]],
-  [Nine, [9]],
-  [Ten, [10]],
-  [Jack, [10]],
-  [Queen, [10]],
-  [King, [10]]
-])
+import HAND_STATUS from './globals/HAND_STATUS'
+import CARD_VALUES from './globals/CARD_VALUES'
 
 const {max} = Math
+const MIN_BET = 500
 
 function calculateChipCount (bet, chipCount) {
   return max(chipCount - bet, 0)
 }
 
 function calculateValues (cards) {
-  var values = CARD_VALUES.get(cards[0].name)
+  var values = CARD_VALUES[cards[0].rank]
 
   for (var i = 1; i < cards.length; i++) {
-    values = doLists(sum, values, CARD_VALUES.get(cards[i].name))
+    values = doLists(sum, values, CARD_VALUES[cards[i].rank])
   }
   return values
 }
 
-export function cleanupPlayer (store, player) {
-  let hands = store.childrenWhere(isHand, player)
-
-  for (let hand of hands) store.remove(hand)
+export function cleanupDealer (dealer) {
+  dealers.hand = null
 }
 
-export function cleanupRound (store) {
-  let dealer = store.firstChild(isDealer, store.root)
-  let players = store.childrenWhere(isPlayer, store.root)
-
-  cleanupPlayer(store, dealer)
-  for (let player of players) cleanupPlayer(store, player)
+export function cleanupPlayer (player) {
+  player.hands = []
 }
 
-export function dealPlayer (store, betValue, player) {
-  let newHand = new Hand(betValue, STATUS.Active)
-  let card1 = new Card.Random(SUITS, CARDS)
-  let card2 = new Card.Random(SUITS, CARDS)
-
-  player.chipCount = calculateChipCount(MIN_BET, player.chipCount)
-  store.attach(player, newHand)
-  store.attach(newHand, card1)
-  store.attach(newHand, card2)
+export function cleanupRound (gameState) {
+  cleanupDealer(gameState.dealer)
+  for (let player of gameState.players) cleanupPlayer(player)
 }
 
-export function dealDealer (store, dealer) {
-  let newHand = new Hand(0, STATUS.Active)
-  let card1 = new Card.Random(SUITS, CARDS)
-  let card2 = new Card.Random(SUITS, CARDS)
-
-  store.attach(dealer, newHand)
-  store.attach(newHand, card1)
-  store.attach(newHand, card2)
-}
-
-export function dealRound (store) {
-  let dealer = store.firstChild(isDealer, store.root)
-  let players = store.childrenWhere(isPlayer, store.root)
+export function dealPlayer (player) {
+  let c1 = new Card.Random
+  let c2 = new Card.Random
+  let newHand = new Hand(HAND_STATUS.Active, false, MIN_BET, [c1, c2])
   
-  dealDealer(store, dealer)
-  for (let player of players) dealPlayer(store, MIN_BET, player)
+  player.chipCount = calculateChipCount(MIN_BET, player.chipCount)
+  player.hands = [newHand]
 }
 
-export function stand (store, hand) {
-  hand.status = hand.status !== STATUS.Active ? hand.status : STATUS.Standing
+export function dealDealer (dealer) {
+  let c1 = new Card.Random
+  let c2 = new Card.Random
+  let newHand = new Hand(HAND_STATUS.Active, false, 0, [c1, c2])
+  
+  dealer.hand = newHand
 }
 
-export function hit (store, hand) {
-  if (hand.status !== STATUS.Active) return log('Not active')
+export function dealRound (gameState) {
+  dealDealer(gameState.dealer)
+  for (let player of gameState.players) dealPlayer(player)
+}
 
-  store.attach(hand, new Card.Random(SUITS, CARDS))
+export function stand (hand) {
+  hand.status = hand.status !== HAND_STATUS.Active 
+    ? hand.status 
+    : HAND_STATUS.Standing
+}
 
-  let cards = [...store.childrenWhere(isCard, hand)]
-  let values = calculateValues(cards)  
+export function hit (hand) {
+  if (hand.status !== HAND_STATUS.Active) return log('Not active')
 
-  if      (lowest(values) > 21)  hand.status = STATUS.Busted
-  else if (contains(values, 21)) hand.status = STATUS.BlackJack
+  hand.cards.push(new Card.Random)
+
+  let values = calculateValues(hand.cards)
+
+  if      (lowest(values) > 21)  hand.status = HAND_STATUS.Busted
+  else if (contains(values, 21)) hand.status = HAND_STATUS.Standing
+  else if (hand.doubledDown)     hand.status = HAND_STATUS.Standing
   else                           hand.status = hand.status
 }
 
-export function split (store, hand) {
-  let owner = store.getById(hand.parentId)
-  let cards = [...store.childrenWhere(isCard, hand)]
-  let newHand = new Hand(MIN_BET, STATUS.Active)
+export function split (player, hand) {
+  let cards = hand.cards
 
-  if (cards.length > 2)                return log('More than 2 cards')
-  if (cards[0].name !== cards[1].name) return log('Not same value!')
-  if (hand.status !== STATUS.Active)   return log('Not active')
-  if (!owner)                          return log('no owner for hand')
-  
-  store.attach(owner, newHand)
-  store.attach(newHand, cards[1])
-  owner.chipCount = calculateChipCount(MIN_BET, owner.chipCount)
-  hit(store, hand)
-  hit(store, newHand)
+  if (cards.length > 2)                   return log('More than 2 cards')
+  if (cards[0].rank !== cards[1].rank)    return log('Not same rank!')
+  if (hand.status !== HAND_STATUS.Active) return log('Not active')
+  if (!player)                            return log('no owner for hand')
+
+  let newCard1 = new Card.Random
+  let newCard2 = new Card.Random
+  let oldCard1 = hand.cards.pop()
+  let oldCard2 = hand.cards.pop()
+  let newHand1 = new Hand(HAND_STATUS.Active, false, MIN_BET, [newCard1, oldCard1])
+  let newHand2 = new Hand(HAND_STATUS.Active, false, MIN_BET, [newCard2, oldCard2])
+
+  player.chipCount = calculateChipCount(MIN_BET, player.chipCount)
+  player.hands = [newHand1, newHand2]
 }
 
-export function doubleDown (store, hand) {
-  let owner = store.getById(hand.parentId)
-  let cards = [...store.childrenWhere(isCard, hand)]
+export function doubleDown (player, hand) {
+  let cards = hand.cards
+  let bet = MIN_BET
 
-  if (cards.length > 2)              return log('More than 2 cards')
-  if (!owner)                        return log('no owner for hand')
-  if (hand.status !== STATUS.Active) return log('Not active')
-  
-  owner.chipCount = calculateChipCount(MIN_BET, owner.chipCount)
-  hand.betValue *= 2
-  hand.doubledDown = true
-  hit(store, hand)
+  if (cards.length > 2)                   return log('More than 2 cards')
+  if (!player)                            return log('no owner for hand')
+  if (hand.status !== HAND_STATUS.Active) return log('Not active')
+
+  player.chipCount = calculateChipCount(bet, player.chipCount) 
+  hand.bet += bet
+  hand.doubleDown = true
 }

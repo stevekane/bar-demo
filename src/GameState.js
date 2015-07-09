@@ -3,7 +3,7 @@
 import {v4} from 'node-uuid'
 import {within, randRange} from './utils/math'
 import {assert, ofType} from './guards'
-import HAND_STATUS from './HAND_STATUS'
+import HAND_STATUS from './globals/HAND_STATUS'
 
 
 //SUITS => [Diamonds, Hearts, Spades, Clubs]
