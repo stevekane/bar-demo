@@ -1,7 +1,5 @@
 'use strict'
 
-import {Server as HTTPServer} from 'http'
-import SocketIO from 'socket.io'
 import {pp, log} from 'pretty-log-2'
 import Protobuf from 'protobufjs'
 import {BlackJackTable, Hand, Card, Player, Dealer} from './Entities'
@@ -15,23 +13,28 @@ const BETTING_TIMER = 3000
 const ACTING_TIMER = 15000
 const SCORING_TIMER = 3000
 
-const TICK_RATE = 200
+const TICK_RATE = 1000
+
+const SOCKET_PORT = process.env.SOCKET_PORT || 4004
 
 const {ByteBuffer} = Protobuf
 const stateBuffer = ByteBuffer.allocate(1024)
 const BlackJackTableProto = Protobuf.protoFromFile('src/BlackJackTable.proto')
 const BlackJackTableBuf = BlackJackTableProto.build('BlackJackTable')
 
-const httpServer = HTTPServer((req, res) => serve(req, res, finalhandler(req, res)))
-const socketServer = new SocketIO(httpServer)
 const clock = new Clock
-const socketPool = new SocketPool(socketServer)
+const socketPool = new SocketPool(SOCKET_PORT)
 const signals = {clock, socketPool}
 
+function broadcast (pool, table) {
+  for (let socket of pool.sockets) socket.send(JSON.stringify(table))
+}
+
 function encode (byteBuffer, ProtoDef, data) {
-  return new ProtoDef(data).encode(byteBuffer)
-                           .flip()
-                           .toArrayBuffer()
+  return new ProtoDef(data)
+    .encode(byteBuffer)
+    .flip()
+    .toArrayBuffer()
 }
 
 function updateSignals (signals) {
@@ -54,19 +57,16 @@ function tableIsEmpty (table) {
          table.players.length === 0
 }
 
-function updateWaiting (signals, table) {
-  log('waiting')
-}
+function updateWaiting (signals, table) {}
 
 function updateBetting (signals, table) {
-  log('betting')     
-
   let {playerEvents} = signals
   let timeElapsed = table.timer <= 0
+  let targetState = hasActivePlayers ? Acting : Betting
   let hasActivePlayers = table.players.length > 0
 
   //if time has elapsed, check if active players and transition
-  if (timeElapsed) return transitionTo(table, hasActivePlayers ? Acting : Betting)
+  if (timeElapsed) return transitionTo(table, targetState)
   
   //loop over input queues, check for bet events
   //if a bet action occurs, perform a bet
@@ -75,16 +75,10 @@ function updateBetting (signals, table) {
 }
 
 function updateActing (signals, table) {
-  log('acting')     
-
-  let timeElapsed = table.timer <= 0
-
-  if (timeElapsed) return transitionTo(table, Scoring)
+  if (table.timer <= 0) return transitionTo(table, Scoring)
 }
 
-function updateScoring (signals, table) {
-  log('scoring')     
-}
+function updateScoring (signals, table) {}
 
 function updateTable (signals, table) {
   let {socketPool} = signals
@@ -114,8 +108,9 @@ function updateTable (signals, table) {
 
 function makeUpdate (table) {
   return function () {
-    updateSignals(signals) 
+    broadcast(signals.socketPool, table)
     updateTable(signals, table)
+    updateSignals(signals) 
   }
 }
 
