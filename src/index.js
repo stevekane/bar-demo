@@ -1,10 +1,13 @@
 'use strict'
 
+import {Server as HTTPServer} from 'http'
+import SocketIO from 'socket.io'
 import {pp, log} from 'pretty-log-2'
 import Protobuf from 'protobufjs'
 import {BlackJackTable, Hand, Card, Player, Dealer} from './Entities'
 import {cleanupRound, dealRound, hit, stand, split, doubleDown} from './transactions'
 import Clock from './Clock'
+import SocketPool from './SocketPool'
 import HAND_STATUS from './globals/HAND_STATUS'
 import {Waiting, Betting, Acting, Scoring} from './globals/GAME_STATES'
 
@@ -18,6 +21,12 @@ const {ByteBuffer} = Protobuf
 const stateBuffer = ByteBuffer.allocate(1024)
 const BlackJackTableProto = Protobuf.protoFromFile('src/BlackJackTable.proto')
 const BlackJackTableBuf = BlackJackTableProto.build('BlackJackTable')
+
+const httpServer = HTTPServer((req, res) => serve(req, res, finalhandler(req, res)))
+const socketServer = new SocketIO(httpServer)
+const clock = new Clock
+const socketPool = new SocketPool(socketServer)
+const signals = {clock, socketPool}
 
 function encode (byteBuffer, ProtoDef, data) {
   return new ProtoDef(data).encode(byteBuffer)
@@ -41,15 +50,24 @@ function transitionTo (table, stateName) {
 }
 
 function tableIsEmpty (table) {
-  return table.inactivePlayers.length === 0 && table.players.length === 0
+  return table.inactivePlayers.length === 0 && 
+         table.players.length === 0
+}
+
+function updateWaiting (signals, table) {
+  log('waiting')
 }
 
 function updateBetting (signals, table) {
   log('betting')     
-  //if all players have bet, go to acting
-  if (table.inactivePlayers.length === 0) transitionTo(table, Acting)
+
+  let {playerEvents} = signals
+  let timeElapsed = table.timer <= 0
+  let hasActivePlayers = table.players.length > 0
+
   //if time has elapsed, check if active players and transition
-  if (table.timer <= 0) 
+  if (timeElapsed) return transitionTo(table, hasActivePlayers ? Acting : Betting)
+  
   //loop over input queues, check for bet events
   //if a bet action occurs, perform a bet
   //joinRound(gameState, player)
@@ -58,6 +76,10 @@ function updateBetting (signals, table) {
 
 function updateActing (signals, table) {
   log('acting')     
+
+  let timeElapsed = table.timer <= 0
+
+  if (timeElapsed) return transitionTo(table, Scoring)
 }
 
 function updateScoring (signals, table) {
@@ -65,18 +87,28 @@ function updateScoring (signals, table) {
 }
 
 function updateTable (signals, table) {
+  let {socketPool} = signals
   let noPlayers = tableIsEmpty(table)
   let arePlayers = !noPlayers
   let alreadyWaiting = table.stateName === Waiting
+
+  for (let addedSocket of socketPool.addedSockets) {
+    console.log('Add player for new socket')
+  }
+
+  for (let removedSocket of socketPool.removedSockets) {
+    console.log('Remove player for disconnected socket')
+  }
 
   if      (noPlayers)                    transitionTo(table, Waiting)
   else if (arePlayers && alreadyWaiting) transitionTo(table, Betting)
   else                                   table.timer -= signals.clock.dT
 
   switch (table.stateName) {
-    case Betting: updateBetting(signals, table)
-    case Acting:  updateActing(signals, table)
-    case Scoring: updateScoring(signals, table)
+    case Waiting: return updateWaiting(signals, table)
+    case Betting: return updateBetting(signals, table)
+    case Acting:  return updateActing(signals, table)
+    case Scoring: return updateScoring(signals, table)
   }
 }
 
@@ -87,13 +119,8 @@ function makeUpdate (table) {
   }
 }
 
-//TODO: Model the inputQueus for connected players as Signal
-let clock = new Clock
-let signals = {clock}
 let t0 = 0
 let d = new Dealer
-let p1 = new Player(5000)
-let p2 = new Player(5000)
-let gs = new BlackJackTable(Waiting, t0, d, [], [p1, p2])
+let gs = new BlackJackTable(Waiting, t0, d, [], [])
 
 setInterval(makeUpdate(gs), TICK_RATE)
