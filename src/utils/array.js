@@ -43,5 +43,5 @@ export function findWhere (prop, value, array) {
 
 export function remove (array, obj) {
   array.splice(array.indexOf(obj), 1)
+  return obj
 }
-

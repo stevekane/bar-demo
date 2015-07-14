@@ -5,6 +5,7 @@ import {doLists, lowest, contains, remove} from './utils/array'
 import {Card, Hand, Player, Dealer} from './Entities'
 import {isHand, isPlayer, isCard, isDealer} from './predicates'
 import {sum} from './utils/math'
+import {move} from './utils/array'
 import HAND_STATUS from './globals/HAND_STATUS'
 import CARD_VALUES from './globals/CARD_VALUES'
 
@@ -34,7 +35,10 @@ export function cleanupPlayer (player) {
 
 export function cleanupRound (gameState) {
   cleanupDealer(gameState.dealer)
-  for (let player of gameState.players) cleanupPlayer(player)
+  for (let player of gameState.players) {
+    cleanupPlayer(player)
+    move(gameState.players, gameState.inactivePlayers, player)
+  }
 }
 
 export function dealPlayer (player) {
@@ -57,6 +61,11 @@ export function dealDealer (dealer) {
 export function dealRound (gameState) {
   dealDealer(gameState.dealer)
   for (let player of gameState.players) dealPlayer(player)
+}
+
+//move a player from inactivePlayers to players
+export function joinRound (gameState, player) {
+  move(gameState.inactivePlayers, gameState.players, player)
 }
 
 export function stand (hand) {

@@ -8,3 +8,5 @@ const GAME_STATES = new Enum(
   'Acting',
   'Scoring'
 )
+
+export default GAME_STATES

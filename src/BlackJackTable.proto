@@ -48,6 +48,16 @@ message Dealer {
 }
 
 message BlackJackTable {
-  Dealer dealer = 1;
-  repeated Player players = 2;
+  enum StateName {
+    Waiting = 0;
+    Betting = 1;
+    Acting = 2;
+    Scoring = 3;
+  }
+
+  required StateName stateName = 1;
+  required int32 timer = 2;
+  required Dealer dealer = 3;
+  repeated Player players = 4;
+  repeated Player inactivePlayers = 5;
 }

@@ -2,9 +2,7 @@
 
 import {v4} from 'node-uuid'
 import {within, randRange} from './utils/math'
-import {assert, ofType} from './guards'
 import HAND_STATUS from './globals/HAND_STATUS'
-
 
 //SUITS => [Diamonds, Hearts, Spades, Clubs]
 //RANKS => [Ace, Two, Three, Four, Five, Six, Seven, 
@@ -18,9 +16,6 @@ const MAX_RANK = 12
 //suit [0..3] rank [0..12]
 export class Card {
   constructor (suit, rank) {
-    assert(within, MIN_SUIT, MAX_SUIT, suit)
-    assert(within, MIN_RANK, MAX_RANK, rank)
-
     this.suit = suit
     this.rank = rank 
   }
@@ -52,16 +47,16 @@ export class Player {
 
 export class Dealer {
   constructor (hand=null) {
-    if (hand) ofType(Hand, hand)
-
     this.hand = hand 
   }
 }
 
 export class BlackJackTable {
-  constructor (activeStateName, dealer, players=[]) {
-    this.activeStateName = activeStateName
+  constructor (stateName, timer, dealer, players, inactivePlayers) {
+    this.stateName = stateName 
+    this.timer = timer
     this.dealer = dealer 
     this.players = players
+    this.inactivePlayers = inactivePlayers
   }
 }
