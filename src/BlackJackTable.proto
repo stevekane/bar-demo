@@ -47,7 +47,7 @@ message Dealer {
   optional Hand hand = 1;
 }
 
-message GameState {
+message BlackJackTable {
   Dealer dealer = 1;
   repeated Player players = 2;
 }

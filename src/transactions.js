@@ -2,7 +2,7 @@
 
 import {pp, log} from 'pretty-log-2'
 import {doLists, lowest, contains, remove} from './utils/array'
-import {Card, Hand, Player, Dealer} from './GameState'
+import {Card, Hand, Player, Dealer} from './Entities'
 import {isHand, isPlayer, isCard, isDealer} from './predicates'
 import {sum} from './utils/math'
 import HAND_STATUS from './globals/HAND_STATUS'
