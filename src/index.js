@@ -12,6 +12,8 @@ const BETTING_TIMER = 3000
 const ACTING_TIMER = 15000
 const SCORING_TIMER = 3000
 
+const TICK_RATE = 200
+
 const {ByteBuffer} = Protobuf
 const stateBuffer = ByteBuffer.allocate(1024)
 const BlackJackTableProto = Protobuf.protoFromFile('src/BlackJackTable.proto')
@@ -46,6 +48,8 @@ function updateBetting (signals, table) {
   log('betting')     
   //if all players have bet, go to acting
   if (table.inactivePlayers.length === 0) transitionTo(table, Acting)
+  //if time has elapsed, check if active players and transition
+  if (table.timer <= 0) 
   //loop over input queues, check for bet events
   //if a bet action occurs, perform a bet
   //joinRound(gameState, player)
@@ -65,15 +69,15 @@ function updateTable (signals, table) {
   let arePlayers = !noPlayers
   let alreadyWaiting = table.stateName === Waiting
 
-  if (noPlayers)                         transitionTo(table, Waiting)
+  if      (noPlayers)                    transitionTo(table, Waiting)
   else if (arePlayers && alreadyWaiting) transitionTo(table, Betting)
   else                                   table.timer -= signals.clock.dT
+
   switch (table.stateName) {
     case Betting: updateBetting(signals, table)
     case Acting:  updateActing(signals, table)
     case Scoring: updateScoring(signals, table)
   }
-  pp(table)
 }
 
 function makeUpdate (table) {
@@ -92,4 +96,4 @@ let p1 = new Player(5000)
 let p2 = new Player(5000)
 let gs = new BlackJackTable(Waiting, t0, d, [], [p1, p2])
 
-setInterval(makeUpdate(gs), 2000)
+setInterval(makeUpdate(gs), TICK_RATE)
