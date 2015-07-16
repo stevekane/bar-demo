@@ -2,6 +2,7 @@
 
 import {v4} from 'node-uuid'
 import {within, randRange} from './utils/math'
+import BidirectionalWeakmap from './BidirectionalWeakmap'
 import HAND_STATUS from './globals/HAND_STATUS'
 
 //SUITS => [Diamonds, Hearts, Spades, Clubs]
@@ -53,6 +54,7 @@ export class Dealer {
 
 export class BlackJackTable {
   constructor (stateName, timer, dealer, players, inactivePlayers) {
+    this.socketPlayerMap = new BidirectionalWeakmap
     this.stateName = stateName 
     this.timer = timer
     this.dealer = dealer 
@@ -60,3 +62,5 @@ export class BlackJackTable {
     this.inactivePlayers = inactivePlayers
   }
 }
+
+BlackJackTable.NET_FIELDS = ['stateName', 'timer', 'dealer', 'players', 'inactivePlayers']

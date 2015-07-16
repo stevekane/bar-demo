@@ -1,8 +1,8 @@
 'use strict'
 
 import {Server as WebSocketServer} from 'ws'
-import Signal from './Signal'
-import {remove} from './utils/array'
+import Signal from '../Signal'
+import {remove} from '../utils/array'
 
 export default class SocketPool extends Signal {
   constructor (port) {

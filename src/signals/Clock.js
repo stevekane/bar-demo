@@ -1,6 +1,6 @@
 'use strict'
 
-import Signal from './Signal'
+import Signal from '../Signal'
 
 export default class Clock extends Signal {
   constructor () {

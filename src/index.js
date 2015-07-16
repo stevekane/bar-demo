@@ -4,37 +4,28 @@ import {pp, log} from 'pretty-log-2'
 import Protobuf from 'protobufjs'
 import {BlackJackTable, Hand, Card, Player, Dealer} from './Entities'
 import {cleanupRound, dealRound, hit, stand, split, doubleDown} from './transactions'
-import Clock from './Clock'
-import SocketPool from './SocketPool'
-import HAND_STATUS from './globals/HAND_STATUS'
 import {Waiting, Betting, Acting, Scoring} from './globals/GAME_STATES'
+import {remove} from './utils/array'
+import Clock from './signals/Clock'
+import SocketPool from './signals/SocketPool'
+import HAND_STATUS from './globals/HAND_STATUS'
 
 const BETTING_TIMER = 3000
 const ACTING_TIMER = 15000
 const SCORING_TIMER = 3000
 
+const DEFAULT_CHIP_COUNT = 10000
+
 const TICK_RATE = 1000
 
 const SOCKET_PORT = process.env.SOCKET_PORT || 4004
-
-const {ByteBuffer} = Protobuf
-const stateBuffer = ByteBuffer.allocate(1024)
-const BlackJackTableProto = Protobuf.protoFromFile('src/BlackJackTable.proto')
-const BlackJackTableBuf = BlackJackTableProto.build('BlackJackTable')
 
 const clock = new Clock
 const socketPool = new SocketPool(SOCKET_PORT)
 const signals = {clock, socketPool}
 
 function broadcast (pool, table) {
-  for (let socket of pool.sockets) socket.send(JSON.stringify(table))
-}
-
-function encode (byteBuffer, ProtoDef, data) {
-  return new ProtoDef(data)
-    .encode(byteBuffer)
-    .flip()
-    .toArrayBuffer()
+  for (let socket of pool.sockets) socket.send(JSON.stringify(table, BlackJackTable.NET_FIELDS))
 }
 
 function updateSignals (signals) {
@@ -87,11 +78,18 @@ function updateTable (signals, table) {
   let alreadyWaiting = table.stateName === Waiting
 
   for (let addedSocket of socketPool.addedSockets) {
-    console.log('Add player for new socket')
+    let player = new Player(DEFAULT_CHIP_COUNT)
+
+    table.socketPlayerMap.set(addedSocket, player)
+    table.inactivePlayers.push(player)
   }
 
   for (let removedSocket of socketPool.removedSockets) {
-    console.log('Remove player for disconnected socket')
+    let player = table.socketPlayerMap.get(removedSocket)
+
+    table.socketPlayerMap.delete(removedSocket)
+    remove(table.inactivePlayers, player)
+    remove(table.players, player)
   }
 
   if      (noPlayers)                    transitionTo(table, Waiting)
@@ -111,6 +109,7 @@ function makeUpdate (table) {
     broadcast(signals.socketPool, table)
     updateTable(signals, table)
     updateSignals(signals) 
+    pp(table)
   }
 }
 
